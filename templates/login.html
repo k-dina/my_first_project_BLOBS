@@ -18,35 +18,38 @@
                     <div class="card-body p-5 text-center">
 
                         <h3 class="mb-5">Log in</h3>
+                        <form action="/users/login/" method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="form-outline mb-4" >
+                                <input type="text" name="username" class="form-control form-control-lg"/>
+                                <label class="form-label">Email</label>
+                            </div>
 
-                        <div class="form-outline mb-4">
-                            <input type="email" id="typeEmailX-2" class="form-control form-control-lg"/>
-                            <label class="form-label" for="typeEmailX-2">Email</label>
-                        </div>
+                            <div class="form-outline mb-4">
+                                <input type="password" name="password" class="form-control form-control-lg"/>
+                                <label class="form-label">Password</label>
+                            </div>
 
-                        <div class="form-outline mb-4">
-                            <input type="password" id="typePasswordX-2" class="form-control form-control-lg"/>
-                            <label class="form-label" for="typePasswordX-2">Password</label>
-                        </div>
+                            <!-- Checkbox -->
+                            <div class="form-check d-flex justify-content-start mb-4">
+                                <input class="form-check-input" type="checkbox" value=""/>
+                                <label class="form-check-label" > Remember password </label>
+                            </div>
 
-                        <!-- Checkbox -->
-                        <div class="form-check d-flex justify-content-start mb-4">
-                            <input class="form-check-input" type="checkbox" value="" id="form1Example3"/>
-                            <label class="form-check-label" for="form1Example3"> Remember password </label>
-                        </div>
+                            <!-- пока поставим просто ссылку для хождения -->
+                            <input class="btn btn-primary btn-lg btn-block"
+                               type="submit">
 
-                        <!-- пока поставим просто ссылку для хождения -->
-                        <a href="{% url 'userspace' %}" class="btn btn-primary btn-lg btn-block" type="submit">Login</a>
-
-                        <hr class="my-4">
-                        <div class="col">
-                            <!-- Simple link -->
-                            <a href="#!">Forgot password?</a>
-                        </div>
-                        <!-- Register buttons -->
-                        <div class="text-center" style="margin-top: 15px;">
-                            <p>Not a member? <a href="{% url 'new_user' %}">Register</a></p>
-                        </div>
+                            <hr class="my-4">
+                            <div class="col">
+                                <!-- Simple link -->
+                                <a href="#!">Forgot password?</a>
+                            </div>
+                            <!-- Register buttons -->
+                            <div class="text-center" style="margin-top: 15px;">
+                                <p>Not a member? <a href="{% url 'new_user' %}">Register</a></p>
+                            </div>
+                        </form>
 
                     </div>
                 </div>

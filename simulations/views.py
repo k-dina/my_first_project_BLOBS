@@ -4,17 +4,11 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+def get_user_name(user) -> str:
+    return f'{user.first_name}'
 
 def index(request):
     return render(request, 'index.html')
-
-
-def login(request):
-    return render(request, 'login.html')
-
-
-def new_user(request):
-    return render(request, 'new_user.html')
 
 
 def saved_simulations(request):
@@ -22,7 +16,11 @@ def saved_simulations(request):
 
 
 def userspace(request):
-    return render(request, 'userspace.html')
+    user = request.user
+    context = {
+        'user_name': get_user_name(user),
+    }
+    return render(request, 'userspace.html', context=context)
 
 
 def view_saved_simulation(request):
@@ -31,10 +29,6 @@ def view_saved_simulation(request):
 
 def newsimulation(request):
     return render(request, 'newsimulation.html')
-
-
-def new_anonymous_simulation(request):
-    return render(request, 'new_anonymous_simulation.html')
 
 
 def view_simulation(request):

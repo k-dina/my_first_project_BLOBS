@@ -9,6 +9,59 @@
           integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
 <body>
+<section class="vh-100" style="background-color: #508bfc;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">
+                <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                    <div class="card-body p-5">
+
+                        <h3 class="mb-5 text-center">You are about to start your simulation!</h3>
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-10">
+                                    <h5>step 1: select resource availability</h5>
+                                    <p>this will determine the fertility of the land: how many resources can grow on it
+                                        and how often they will be renewed (on a relative scale from 1 to 10)</p>
+                                </div>
+                                <div class="col-2">
+                                    <input type="number" class="form-control form-control-lg" min="1" max="10"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-8">
+                                    <h5>step 2: choose hereditary trait strength</h5>
+                                    <p>blobs have two hereditary traits: vitality and charisma. Vitality increases the likelihood of blob survival and charisma determines blob's strength as a leader. Input values will be set as an average for initial population</p>
+                                </div>
+                                <div class="col-4">
+                                    <input type="number" class="form-control form-control-lg"  min="1" max="100" placeholder="vitality"/>
+                                    <input type="number" class="form-control form-control-lg mt-3" min="1" max="100" placeholder="charisma"/>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h5 class="text-center mt-5">Now you're all set!</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- пока поставим просто ссылку для хождения -->
+                            <a href="{% url 'view_simulation' %}" class="btn btn-primary btn-lg btn-block"
+                               type="submit">Let's go!</a>
+
+
+
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
