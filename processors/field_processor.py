@@ -19,7 +19,8 @@ class FieldProcessor(Processor):
 
         return {x: self.__exp for x in new_food}
 
-    def exp(self, field):
+    @staticmethod
+    def exp(field):
         for key in field:
             if field[key] > 0:
                 field[key] -= 1

@@ -1,9 +1,9 @@
 import numpy as np
 
-
 LOOK_AROUND = [(x, y) for x in range(-5, 6) for y in range(-5, 6)]
 LOOK_AROUND = sorted(LOOK_AROUND, key=lambda x: max(x))
 LOOK_AROUND.remove((0, 0))
+
 
 def clamp(value, lower, upper) -> int:
     return lower if value < lower else value if value < upper else upper
@@ -43,7 +43,6 @@ def get_vector(goal, circle):
 
 
 def clamp_2d(goal, speed):
-    distance = get_circle(goal) - speed
-    if distance <= 0:
+    if get_circle(goal) - speed <= 0:
         return goal
     return get_vector(goal, speed)

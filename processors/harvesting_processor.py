@@ -64,7 +64,8 @@ class HarvestingProcessor(Processor):
                                           clamp_2d(vector_diff(goal, blob['location']), blob['speed']))
             blobs_on_field[blob['location']].append(blob['id'])
 
-    def __success_prob(self, args, blobs):
+    @staticmethod
+    def __success_prob(args, blobs):
         rez = {blobs[arg]['id']: (blobs[arg]['life'] + blobs[arg]['vitality'] + blobs[arg]['charisma']) for arg in
                args}
         return {blob_id: prob / sum(rez.values()) for blob_id, prob in rez.items()}

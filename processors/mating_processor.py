@@ -1,6 +1,5 @@
 from .processor import Processor
-from functions import *
-
+from .functions import *  # todo: конкретные функции
 
 
 class MatingProcessor(Processor):
