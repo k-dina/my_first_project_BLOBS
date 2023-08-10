@@ -2,4 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class Processor(ABC):
-    pass
+    @abstractmethod
+    def __init__(self, configuration):
+        ...

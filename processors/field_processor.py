@@ -1,8 +1,7 @@
-from processor import Processor
+from .processor import Processor
+from .functions import clamp
 import random
 
-def clamp(value, lower, upper) -> int:
-    return lower if value < lower else value if value < upper else upper
 
 class FieldProcessor(Processor):
     def __init__(self, configuration):
@@ -11,14 +10,16 @@ class FieldProcessor(Processor):
         self.__exp = configuration['exp']
         self.__field_size = configuration['field_size']
 
-    def process(self, field):
-        field = {key: value - 1 if value > 0 else value for (key, value) in field.items()}
+    def grow_food(self, field):
         empty_cells = list(filter(lambda x: field[x] == 0, field.keys()))
 
-        food_amount = clamp(round(0.04 * self.__field_size * self.__field_size * self.__field_fertility),
-                            0,
+        food_amount = clamp(round(0.04 * self.__field_size * self.__field_size * self.__field_fertility), 0,
                             len(empty_cells))
         new_food = random.sample(list(empty_cells), food_amount)
 
-        field.update({x: self.__exp for x in new_food})
+        return {x: self.__exp for x in new_food}
 
+    def exp(self, field):
+        for key in field:
+            if field[key] > 0:
+                field[key] -= 1

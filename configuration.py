@@ -6,4 +6,6 @@ configuration = {
     'vitality': 70,
     'charisma': 50,
     'life_decrease': 1,
+    'life_increase': 20,
+    'prob_decrease': 0.2,
 }

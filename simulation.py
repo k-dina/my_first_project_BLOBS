@@ -3,6 +3,7 @@ import random
 import numpy as np
 from configuration import configuration
 
+from processors.field_processor import FieldProcessor
 from processors.health_speed_processor import HealthSpeedProcessor
 from processors.mating_processor import MatingProcessor
 from processors.harvesting_processor import HarvestingProcessor
@@ -14,7 +15,7 @@ def clamp(value, lower, upper) -> int:
 
 
 # тут мы прям вот так делаем первые 100 блобсов
-other_blobs = {}
+blobs_on_field = {(i, j): [] for i in range(configuration['field_size']) for j in range(configuration['field_size'])}
 blobs = {}
 blob_location = set()
 for i in range(100):
@@ -26,12 +27,13 @@ for i in range(100):
     blob['speed'] = round((blob['life'] + blob['vitality']) / 40)
     blob['freeze'] = 0
     while True:
-        location = random.randint(0, 100), random.randint(0, 100)
+        location = random.randint(0, 99), random.randint(0, 99)
         if location not in blob_location:
             blob['location'] = location
             break
-    other_blobs[blob['location']] = [blob]
+    blobs_on_field[blob['location']] = [i]
     blobs[i] = blob
+
 
 # тут будем хранить данные о поле. ключи - клетки поля. числа - состояния. при данных значениях параметра
 # 3 - свежая еда, 2 - не очень свежая еда, 1 - скоро испортится, 0 - нет еды
@@ -39,10 +41,18 @@ for i in range(100):
 field = dict.fromkeys([(i, j) for i in range(configuration['field_size'])
                        for j in range(configuration['field_size'])], 0)
 
-
-
-
 health_processor = HealthSpeedProcessor(configuration)
-harvesting_processor = HarvestingProcessor(configuration)
 mating_processor = MatingProcessor(configuration)
+field_processor = FieldProcessor(configuration)
+harvesting_processor = HarvestingProcessor(configuration)
+
+for i in range(1):
+    if not (i % 24):
+        field_processor.exp(field)
+        field.update(field_processor.grow_food(field))
+    health_processor.process(blobs, blobs_on_field)
+    mating_processor.process(blobs, blobs_on_field)
+    harvesting_processor.process(field, blobs, blobs_on_field)
+
+
 

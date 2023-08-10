@@ -1,4 +1,4 @@
-from processor import Processor
+from .processor import Processor
 
 
 class HealthSpeedProcessor(Processor):
@@ -6,10 +6,12 @@ class HealthSpeedProcessor(Processor):
         super().__init__(configuration)
         self.__life_decrease = configuration['life_decrease']
 
-    def process(self, blobs, other_blobs):
-        for blob in blobs:
+    def process(self, blobs, blobs_on_field):
+        for blob_id in blobs:
+            blob = blobs[blob_id]
             blob['life'] -= self.__life_decrease
             if blob['life'] <= 0:
-                blobs.pop(int(blob['id']))
-                other_blobs[blob['location']].remove(blob['id'])
+                blobs.pop(blobs['id'])
+                blobs_on_field[blob['location']].remove(blob['id'])
             blob['speed'] = round((blob['life'] + blob['vitality']) / 40)
+
