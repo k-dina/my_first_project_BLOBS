@@ -1,11 +1,13 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from .forms import SimulationForm
+from .simulator.simulation import run_simulation
+from .simulator.configuration import *
 
-# Create your views here.
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 
 def get_user_name(user) -> str:
     return f'{user.first_name}'
+
 
 def index(request):
     return render(request, 'index.html')
@@ -28,7 +30,28 @@ def view_saved_simulation(request):
 
 
 def newsimulation(request):
-    return render(request, 'newsimulation.html')
+    next_page = None
+    errors = None
+
+    if request.method == 'GET':
+        next_page = request.GET.get('next')
+        form = SimulationForm()
+
+    elif request.method == 'POST':
+        form = SimulationForm(request.POST)
+
+        if form.is_valid():
+
+            configuration = configure(form.cleaned_data)
+            run_simulation(configuration)
+
+            return HttpResponseRedirect('/view_simulation')
+        errors = 'Fill the parameters!'
+
+    else:
+        form = SimulationForm()
+
+    return render(request, 'newsimulation.html', {'form': form, 'next': next_page, 'errors': errors})
 
 
 def view_simulation(request):

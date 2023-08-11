@@ -33,7 +33,7 @@ class HarvestingProcessor(Processor):
 
     def __eat_food(self, blob_id, blobs, food_location, field):
 
-        blobs[blob_id]['life'] += self.__life_increase
+        blobs[blob_id]['life'] = min(100, self.__life_increase)
         field[food_location] = 0
 
     def __find_food(self, blob_id, field, blobs, blobs_on_field):
