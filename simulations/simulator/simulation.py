@@ -11,7 +11,10 @@ from .processors.health_speed_processor import HealthSpeedProcessor
 from .processors.mating_processor import MatingProcessor
 from .processors.harvesting_processor import HarvestingProcessor
 
+from celery import shared_task
 
+
+@shared_task
 def run_simulation(configuration):
     simulation_id = str(uuid.uuid4())
     db = get_db()
@@ -56,4 +59,3 @@ def run_simulation(configuration):
         })
 
 
-run_simulation(get_initial_configuration())
