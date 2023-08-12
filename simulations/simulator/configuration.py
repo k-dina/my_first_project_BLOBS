@@ -14,10 +14,8 @@ def get_initial_configuration():
 
 def configure(parameters):
     configuration = get_initial_configuration()
-    if parameters['field_fertility']:
-        configuration['field_fertility'] = parameters['field_fertility']
-    if parameters['vitality']:
-        configuration['vitality'] = parameters['vitality']
-    if parameters['charisma']:
-        configuration['charisma'] = parameters['charisma']
+    configuration['field_fertility'] = parameters['field_fertility']
+    configuration['vitality'] = parameters['vitality']
+    configuration['charisma'] = parameters['charisma']
     return configuration
+

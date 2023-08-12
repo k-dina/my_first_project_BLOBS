@@ -1,16 +1,8 @@
-from __future__ import absolute_import
 import os
 from celery import Celery
 
-# этот код скопирован с manage.py
-# он установит модуль настроек по умолчанию Django для приложения 'celery'.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'celery_django.settings')
 
-# здесь вы меняете имя
-app = Celery("celery_django")
-
-# Для получения настроек Django, связываем префикс "CELERY" с настройкой celery
-app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# загрузка tasks.py в приложение django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "graduation_project.settings")
+app = Celery("graduation_project")
+app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()

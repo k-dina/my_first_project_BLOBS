@@ -43,9 +43,10 @@ def newsimulation(request):
         if form.is_valid():
 
             configuration = configure(form.cleaned_data)
-            run_simulation(configuration)
+            task = run_simulation.apply_async(configuration)
+            task_id = task.id
+            return HttpResponseRedirect('/view_simulation?task_id=' + task_id)
 
-            return HttpResponseRedirect('/view_simulation')
         errors = 'Fill the parameters!'
 
     else:

@@ -6,6 +6,7 @@ from .processors.functions import clamp
 import uuid
 from .configuration import get_initial_configuration
 
+
 from .processors.field_processor import FieldProcessor
 from .processors.health_speed_processor import HealthSpeedProcessor
 from .processors.mating_processor import MatingProcessor
@@ -57,5 +58,6 @@ def run_simulation(configuration):
             'blobs': str(blobs),
             'blobs_on_field': str(blobs_on_field),
         })
+        print('task executed')
 
 
