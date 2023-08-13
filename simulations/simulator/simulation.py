@@ -4,21 +4,16 @@ import numpy as np
 from .mongo_db import save_snapshot, get_db
 from .processors.functions import clamp
 import uuid
-from .configuration import get_initial_configuration
-
 
 from .processors.field_processor import FieldProcessor
 from .processors.health_speed_processor import HealthSpeedProcessor
 from .processors.mating_processor import MatingProcessor
 from .processors.harvesting_processor import HarvestingProcessor
 
-from celery import shared_task
 
 
-@shared_task
 def run_simulation(configuration):
     simulation_id = str(uuid.uuid4())
-    db = get_db()
 
     blobs_on_field = {(i, j): [] for i in range(configuration['field_size']) for j in
                       range(configuration['field_size'])}
@@ -52,12 +47,10 @@ def run_simulation(configuration):
         health_processor.process(blobs, blobs_on_field)
         mating_processor.process(blobs, blobs_on_field)
         harvesting_processor.process(field, blobs, blobs_on_field)
+        db = get_db()
         save_snapshot(db, simulation_id, {
             'step': i,
-            'field': str(field),
             'blobs': str(blobs),
+            'field': str(field),
             'blobs_on_field': str(blobs_on_field),
         })
-        print('task executed')
-
-

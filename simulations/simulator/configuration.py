@@ -1,5 +1,7 @@
-def get_initial_configuration():
-    return {
+from copy import copy
+
+
+DEFAULT_CONFIGURATION = {
         'field_size': 100,
         'exp': 3,
         'sd': 1,
@@ -13,9 +15,7 @@ def get_initial_configuration():
 
 
 def configure(parameters):
-    configuration = get_initial_configuration()
-    configuration['field_fertility'] = parameters['field_fertility']
-    configuration['vitality'] = parameters['vitality']
-    configuration['charisma'] = parameters['charisma']
+    configuration = copy(DEFAULT_CONFIGURATION)
+    configuration.update(parameters)
     return configuration
 
