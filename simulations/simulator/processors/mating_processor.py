@@ -1,42 +1,49 @@
 from .processor import Processor
-from .functions import *  # todo: конкретные функции
+from .functions import LOOK_AROUND, crop_area, get_vision_field, clamp
+import numpy as np
+
 
 
 class MatingProcessor(Processor):
     look_around = LOOK_AROUND
 
-    def __init__(self, configuration):
-        super().__init__(configuration)
-        self.__sd = configuration['sd']
-        self.__prob_decrease = configuration['prob_decrease']
-        self.__field_size = configuration['field_size']
+    def __init__(self):
+        super().__init__()
+        # self.__sd = configuration['sd']
+        # self.__prob_decrease = configuration['prob_decrease']
 
-    def process(self, blobs, blobs_on_field):
+    # self.__field_size = configuration['field_size']
 
-        pairs = self.__collect_pairs(blobs, blobs_on_field)
+    @staticmethod
+    def process(blobs, blobs_on_field, configuration):
 
-        for pair in pairs:
-            pairs[pair] = self.__success_prob(blobs[pair[0]], blobs[pair[1]])
+        pairs = MatingProcessor.__collect_pairs(blobs, blobs_on_field, configuration)
 
-        pairs = self.__match_blobs(pairs)
 
         for pair in pairs:
-            self.__new_blob(blobs[pair[0][0]], blobs[pair[0][1]], blobs, blobs_on_field)
+            pairs[pair] = MatingProcessor.__success_prob(blobs[pair[0]], blobs[pair[1]], configuration)
 
-    def __collect_pairs(self, blobs, blobs_on_field):
+        pairs = MatingProcessor.__match_blobs(pairs)
+
+        for pair in pairs:
+            MatingProcessor.__new_blob(blobs[pair[0][0]], blobs[pair[0][1]], blobs, blobs_on_field, configuration)
+
+    @staticmethod
+    def __collect_pairs(blobs, blobs_on_field, configuration):
         pairs = {}
 
         for blob in blobs.values():
 
             for location in crop_area(get_vision_field(blob['location'], MatingProcessor.look_around),
-                                      self.__field_size):
+                                      configuration['field_size']):
                 if blobs_on_field[location]:
                     for other_blob in blobs_on_field[location]:
                         pair = tuple(sorted([blob['id'], other_blob]))
                         pairs[pair] = 0
         return pairs
 
-    def __match_blobs(self, pairs):
+    @staticmethod
+    def __match_blobs(pairs):
         pairs = sorted([[key, value] for key, value in pairs.items()], key=lambda x: x[1], reverse=True)
         matched_blobs = set()
 
@@ -49,14 +56,15 @@ class MatingProcessor(Processor):
         pairs = filter(lambda x: x[1], pairs)
         return pairs
 
-    def __new_blob(self, blob, other_blob, blobs, blobs_on_field):
+    @staticmethod
+    def __new_blob(blob, other_blob, blobs, blobs_on_field, configuration):
         i = len(blobs)
 
         new_blob = {}
         new_blob['id'] = i
 
         mean = (blob['vitality'] + other_blob['vitality']) / 2
-        sd = self.__sd
+        sd = configuration['sd']
         new_blob['vitality'] = clamp(np.random.normal(mean, sd), 1, 100)
 
         mean = (blob['charisma'] + other_blob['charisma']) / 2
@@ -76,6 +84,7 @@ class MatingProcessor(Processor):
 
         return new_blob
 
-    def __success_prob(self, blob, other_blob):
+    @staticmethod
+    def __success_prob(blob, other_blob, configuration):
         distance = abs((other_blob['vitality'] - blob['vitality']) / 100)
-        return 1 - distance - self.__prob_decrease
+        return 1 - distance - configuration['prob_decrease']

@@ -17,7 +17,7 @@
                     <div class="card-body p-5">
 
                         <h3 class="mb-5 text-center">You are about to start your simulation!</h3>
-                        <form method="post" novalidate>
+                        <form action="/newsimulation" method="post" novalidate>
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-10">
@@ -32,7 +32,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <h5>step 2: choose hereditary trait strength</h5>
-                                    <p>blobs have two hereditary traits: vitality and charisma. Vitality increases the likelihood of blob survival and charisma determines blob's strength as a leader. Input values will be set as an average for initial population</p>
+                                    <p>blobs have two hereditary traits: vitality and charisma. Vitality increases the likelihood of blob survival and charisma determines blob's strength as a leader. Input values will be set as an average for initial population (1 to 100)</p>
                                 </div>
                                 <div class="col-4">
                                     <input type="number" name="vitality" class="form-control form-control-lg"  min="1" max="100" placeholder="vitality"/>
@@ -40,13 +40,15 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-12">
-                                        <h5 class="text-center mt-5">Now you're all set!</h5>
+                                    <div class="col-12 text-center mt-5">
+                                        <input type="submit" class="btn btn-primary btn-lg btn-block" value="Start">
                                     </div>
                                 </div>
                             </div>
 
-                            <input type="submit" class="btn btn-primary btn-lg btn-block">
+                            {% if errors %}
+                                <p class="error text-danger mt-5" >{{ errors }}</p>
+                            {% endif %}
 
 
 

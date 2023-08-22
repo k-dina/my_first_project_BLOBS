@@ -1,7 +1,7 @@
-# start simulation
 import random
 import numpy as np
-from .mongo_db import save_snapshot, get_db
+from .mongo_db import save_snapshot, save_configuration, create_simulation, get_snapshot_by_step, get_config, \
+    restore_snapshot
 from .processors.functions import clamp
 import uuid
 
@@ -11,8 +11,7 @@ from .processors.mating_processor import MatingProcessor
 from .processors.harvesting_processor import HarvestingProcessor
 
 
-
-def run_simulation(configuration):
+def initialize_simulation(configuration):
     simulation_id = str(uuid.uuid4())
 
     blobs_on_field = {(i, j): [] for i in range(configuration['field_size']) for j in
@@ -35,22 +34,23 @@ def run_simulation(configuration):
     field = {(i, j): 0 for i in range(configuration['field_size'])
              for j in range(configuration['field_size'])}
 
-    health_processor = HealthSpeedProcessor(configuration)
-    mating_processor = MatingProcessor(configuration)
-    field_processor = FieldProcessor(configuration)
-    harvesting_processor = HarvestingProcessor(configuration)
+    create_simulation(simulation_id)
+    save_configuration(simulation_id, configuration)
+    save_snapshot(simulation_id, 0, blobs, field, blobs_on_field)
+    return simulation_id
+
+
+def run_simulation(simulation_id, step):
+    snapshot = get_snapshot_by_step(simulation_id, step)
+    step, blobs, field, blobs_on_field = restore_snapshot(snapshot)
+
+    configuration = get_config(simulation_id)
 
     for i in range(10):
         if not (i % 24):
-            field_processor.exp(field)
-            field.update(field_processor.grow_food(field))
-        health_processor.process(blobs, blobs_on_field)
-        mating_processor.process(blobs, blobs_on_field)
-        harvesting_processor.process(field, blobs, blobs_on_field)
-        db = get_db()
-        save_snapshot(db, simulation_id, {
-            'step': i,
-            'blobs': str(blobs),
-            'field': str(field),
-            'blobs_on_field': str(blobs_on_field),
-        })
+            FieldProcessor.exp(field)
+            field.update(FieldProcessor.grow_food(field, configuration))
+        HealthSpeedProcessor.process(blobs, blobs_on_field, configuration)
+        MatingProcessor.process(blobs, blobs_on_field, configuration)
+        HarvestingProcessor.process(field, blobs, blobs_on_field, configuration)
+        save_snapshot(simulation_id, step + i, blobs, field, blobs_on_field)

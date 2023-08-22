@@ -1,10 +1,17 @@
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
+from celery.result import AsyncResult
+import json
+import time
+
+import pymongo
+from mongoengine import connect
+
 from .forms import SimulationForm
 from .tasks import run_simulation_task
+from .simulator.simulation import initialize_simulation
 from .simulator.configuration import *
-from celery.result import AsyncResult
-
+from .simulator.models import Simulation, Snapshot, Blob
 
 
 def get_user_name(user) -> str:
@@ -43,13 +50,15 @@ def newsimulation(request):
         form = SimulationForm(request.POST)
 
         if form.is_valid():
-
             configuration = configure(form.cleaned_data)
-            task = run_simulation_task.apply_async(args=[configuration])
-            task_id = task.id
-            return HttpResponseRedirect(f'/view_simulation/{task_id}/')
+            simulation_id = initialize_simulation(configuration)
+            task = run_simulation_task.apply_async(args=[simulation_id, 0])
 
-        errors = 'Fill the parameters!'
+            # return HttpResponseRedirect(f'/view_simulation/{task_id}/')
+            return HttpResponseRedirect(f'/view_simulation/{simulation_id}/')
+
+        errors = 'The parameters are not filled or filled incorrectly! ' \
+                 'Read the instructions carefully and resubmit the form'
 
     else:
         form = SimulationForm()
@@ -57,18 +66,44 @@ def newsimulation(request):
     return render(request, 'newsimulation.html', {'form': form, 'next': next_page, 'errors': errors})
 
 
-def view_simulation(request, id):
-    #task_id = request.GET.get('task_id')
-    task_id = id
-    task_result = AsyncResult(task_id)
-    result = {
-        "task_id": task_id,
-        "task_status": task_result.status,
-        "task_result": task_result.result
-    }
-    return JsonResponse(result, status=200)
-    #return render(request, 'view_simulation.html')
 
+
+
+
+def view_simulation(request, id):
+    # task_id = id
+    # task_result = AsyncResult(task_id)
+    simulation_id = id
+    connect('simulations', host='mongo', port=27017)
+    simulation = Simulation.objects.get(simulation_id=simulation_id)
+    last_snapshot = simulation.snapshots[-1]
+    data = {
+        'label': 'population',
+        'value': len(last_snapshot.blobs)
+    }
+
+
+    # result = {
+    #     "task_id": task_id,
+    #     "task_status": task_result.status,
+    #     "task_result": task_result.result
+    # }
+
+    # return render(request, 'view_simulation.html', {'sse_response': response})
+
+    # return JsonResponse(data, status=200)
+    return render(request, 'view_simulation.html')
+#
+# def view_simulation(request, id):
+#     simulation_id = id
+#     connect('simulations', host='mongo', port=27017)
+#     simulation = Simulation.objects.get(simulation_id=simulation_id)
+#     last_snapshot = simulation.snapshots[-1]
+#     initial_data = {
+#         'label': 'population',
+#         'value': len(last_snapshot.blobs)
+#     }
+#
 
 def save_simulation(request):
     return render(request, 'save_simulation.html')

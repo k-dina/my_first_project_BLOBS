@@ -34,12 +34,14 @@ def get_vision_field(location, look_around):
 
 
 def get_vector(goal, circle):
-    time = 0
+    if circle == 0:
+        return 0, 0
+    time = 0.2
     while True:
-        time += 0.2
         result = lerp(np.array((0, 0)), np.array(goal), time)
         if get_circle(result) == circle:
             return int(result[0]), int(result[1])
+        time += 0.2
 
 
 def clamp_2d(goal, speed):
