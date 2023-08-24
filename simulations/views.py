@@ -13,6 +13,8 @@ from .simulator.simulation import initialize_simulation
 from .simulator.configuration import *
 from .simulator.models import Simulation, Snapshot, Blob
 
+connect('simulations', host='mongo', port=27017)
+
 
 def get_user_name(user) -> str:
     return f'{user.first_name}'
@@ -68,7 +70,6 @@ def newsimulation(request):
 
 def get_snapshots(request, id, step):
     simulation_id = id
-    connect('simulations', host='mongo', port=27017)
     simulation = Simulation.objects.get(simulation_id=simulation_id)
     new_data = simulation.snapshots[step::]
     data = {}
@@ -86,9 +87,11 @@ def view_simulation(request, id):
     #     "task_status": task_result.status,
     #     "task_result": task_result.result
     # }
-
+    simulation_id = id
+    simulation = Simulation.objects.get(simulation_id=simulation_id)
+    last_step = len(simulation.snapshots)
     # return JsonResponse(data, status=200)
-    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': 0})
+    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': last_step})
 
 
 
