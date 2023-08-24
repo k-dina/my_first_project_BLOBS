@@ -46,7 +46,7 @@ def run_simulation(simulation_id, step):
 
     configuration = get_config(simulation_id)
 
-    for i in range(10):
+    for i in range(1, 11):
         if not (i % 24):
             FieldProcessor.exp(field)
             field.update(FieldProcessor.grow_food(field, configuration))
@@ -54,3 +54,5 @@ def run_simulation(simulation_id, step):
         MatingProcessor.process(blobs, blobs_on_field, configuration)
         HarvestingProcessor.process(field, blobs, blobs_on_field, configuration)
         save_snapshot(simulation_id, step + i, blobs, field, blobs_on_field)
+
+

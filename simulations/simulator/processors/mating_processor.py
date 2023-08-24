@@ -3,7 +3,6 @@ from .functions import LOOK_AROUND, crop_area, get_vision_field, clamp
 import numpy as np
 
 
-
 class MatingProcessor(Processor):
     look_around = LOOK_AROUND
 
@@ -19,7 +18,6 @@ class MatingProcessor(Processor):
 
         pairs = MatingProcessor.__collect_pairs(blobs, blobs_on_field, configuration)
 
-
         for pair in pairs:
             pairs[pair] = MatingProcessor.__success_prob(blobs[pair[0]], blobs[pair[1]], configuration)
 
@@ -34,12 +32,14 @@ class MatingProcessor(Processor):
 
         for blob in blobs.values():
 
-            for location in crop_area(get_vision_field(blob['location'], MatingProcessor.look_around),
-                                      configuration['field_size']):
-                if blobs_on_field[location]:
-                    for other_blob in blobs_on_field[location]:
-                        pair = tuple(sorted([blob['id'], other_blob]))
-                        pairs[pair] = 0
+            if blob['life'] > 70 and not blob['freeze']:
+
+                for location in crop_area(get_vision_field(blob['location'], MatingProcessor.look_around),
+                                          configuration['field_size']):
+                    if blobs_on_field[location]:
+                        for other_blob in blobs_on_field[location]:
+                            pair = tuple(sorted([blob['id'], other_blob]))
+                            pairs[pair] = 0
         return pairs
 
     @staticmethod

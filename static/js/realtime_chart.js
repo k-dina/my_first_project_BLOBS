@@ -1,4 +1,6 @@
+
 var ctx = document.getElementById('realtimeChart').getContext('2d');
+var step = last_step;
 var chart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -37,4 +39,18 @@ function shiftChartData(newData) {
 
     chart.update(); // Обновление графика
 }
+
+
+
+//setInterval(async () => {
+//  const res = await fetch(`/get_snapshot/${simulation_id}/`);
+//  console.log(res);
+//}, 2000);
+
+setInterval(() => {
+  axios.get(`/get_snapshot/${simulation_id}/`)
+  .then(function (response) {
+    shiftChartData(response.data);
+  })
+}, 2000);
 

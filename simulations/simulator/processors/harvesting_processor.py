@@ -12,7 +12,8 @@ class HarvestingProcessor(Processor):
     @staticmethod
     def process(field, blobs, blobs_on_field, configuration):
         for blob_id in blobs:
-            HarvestingProcessor.__find_food(blob_id, field, blobs, blobs_on_field, configuration)
+            if not blobs[blob_id]['freeze']:
+                HarvestingProcessor.__find_food(blob_id, field, blobs, blobs_on_field, configuration)
         for location in field:
             if field[location]:
                 if blobs_on_field[location]:

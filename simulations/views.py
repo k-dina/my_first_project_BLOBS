@@ -66,22 +66,20 @@ def newsimulation(request):
     return render(request, 'newsimulation.html', {'form': form, 'next': next_page, 'errors': errors})
 
 
-
-
+def get_snapshots(request, id, step):
+    simulation_id = id
+    connect('simulations', host='mongo', port=27017)
+    simulation = Simulation.objects.get(simulation_id=simulation_id)
+    new_data = simulation.snapshots[step::]
+    data = {}
+    for snapshot in new_data:
+        data[snapshot.step] = len(snapshot.blobs)
+    return JsonResponse(data, status=200)
 
 
 def view_simulation(request, id):
     # task_id = id
     # task_result = AsyncResult(task_id)
-    simulation_id = id
-    connect('simulations', host='mongo', port=27017)
-    simulation = Simulation.objects.get(simulation_id=simulation_id)
-    last_snapshot = simulation.snapshots[-1]
-    data = {
-        'label': 'population',
-        'value': len(last_snapshot.blobs)
-    }
-
 
     # result = {
     #     "task_id": task_id,
@@ -89,21 +87,11 @@ def view_simulation(request, id):
     #     "task_result": task_result.result
     # }
 
-    # return render(request, 'view_simulation.html', {'sse_response': response})
-
     # return JsonResponse(data, status=200)
-    return render(request, 'view_simulation.html')
-#
-# def view_simulation(request, id):
-#     simulation_id = id
-#     connect('simulations', host='mongo', port=27017)
-#     simulation = Simulation.objects.get(simulation_id=simulation_id)
-#     last_snapshot = simulation.snapshots[-1]
-#     initial_data = {
-#         'label': 'population',
-#         'value': len(last_snapshot.blobs)
-#     }
-#
+    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': 0})
+
+
+
 
 def save_simulation(request):
     return render(request, 'save_simulation.html')
