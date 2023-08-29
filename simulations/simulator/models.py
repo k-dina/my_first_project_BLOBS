@@ -1,4 +1,3 @@
-from django.db import models
 from mongoengine import *
 
 
@@ -13,13 +12,14 @@ class Blob(EmbeddedDocument):
 
 
 class Snapshot(Document):
-    step = IntField(primary_key=True)
+    simulation_id = StringField()
+    step = IntField()
     blobs = DictField(EmbeddedDocumentField(Blob))
     field = DictField()
     blobs_on_field = DictField()
 
-
 class Configuration(Document):
+    simulation_id = StringField()
     field_size = IntField()
     exp = IntField()
     sd = IntField()
@@ -30,8 +30,3 @@ class Configuration(Document):
     life_increase = IntField()
     prob_decrease = FloatField()
 
-
-class Simulation(Document):
-    simulation_id = StringField(primary_key=True)
-    configuration = ReferenceField(Configuration)
-    snapshots = ListField(ReferenceField(Snapshot), default=[])

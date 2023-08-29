@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from .mongo_db import save_snapshot, save_configuration, create_simulation, get_snapshot_by_step, get_config, \
+from .mongo_db import save_snapshot, save_configuration, get_snapshot_by_step, get_config, \
     restore_snapshot
 from .processors.functions import clamp
 import uuid
@@ -34,9 +34,9 @@ def initialize_simulation(configuration):
     field = {(i, j): 0 for i in range(configuration['field_size'])
              for j in range(configuration['field_size'])}
 
-    create_simulation(simulation_id)
     save_configuration(simulation_id, configuration)
     save_snapshot(simulation_id, 0, blobs, field, blobs_on_field)
+
     return simulation_id
 
 
@@ -46,7 +46,7 @@ def run_simulation(simulation_id, step):
 
     configuration = get_config(simulation_id)
 
-    for i in range(1, 11):
+    for i in range(1, 101):
         if not (i % 24):
             FieldProcessor.exp(field)
             field.update(FieldProcessor.grow_food(field, configuration))
@@ -54,5 +54,3 @@ def run_simulation(simulation_id, step):
         MatingProcessor.process(blobs, blobs_on_field, configuration)
         HarvestingProcessor.process(field, blobs, blobs_on_field, configuration)
         save_snapshot(simulation_id, step + i, blobs, field, blobs_on_field)
-
-

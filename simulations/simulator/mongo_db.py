@@ -1,6 +1,6 @@
 import pymongo
 from mongoengine import connect
-from .models import Blob, Simulation, Snapshot, Configuration
+from .models import Blob, Snapshot, Configuration
 
 client = pymongo.MongoClient()
 
@@ -9,14 +9,7 @@ db = client['simulations']
 connect('simulations', host='mongo', port=27017)
 
 
-def create_simulation(id):
-    if not Simulation.objects(simulation_id=id):
-        Simulation(simulation_id=id).save()
-
-
 def save_snapshot(id, step, blobs, field, blobs_on_field):
-    simulation = Simulation.objects.get(simulation_id=id)
-
     blob_documents = {}
     for i in blobs:
         blob = Blob(**blobs[i])
@@ -25,23 +18,19 @@ def save_snapshot(id, step, blobs, field, blobs_on_field):
     field = {str(key): value for key, value in field.items()}
     blobs_on_field = {str(key): value for key, value in blobs_on_field.items()}
 
-    snapshot = Snapshot(step=step, blobs=blob_documents, field=field, blobs_on_field=blobs_on_field)
+    snapshot = Snapshot(simulation_id=id, step=step, blobs=blob_documents, field=field, blobs_on_field=blobs_on_field)
     snapshot.save()
-    simulation.snapshots.append(snapshot)
-    simulation.save()
 
 
 def save_configuration(id, configuration):
-    simulation = Simulation.objects.get(simulation_id=id)
     configuration_doc = Configuration(**configuration)
+    configuration_doc.simulation_id = id
     configuration_doc.save()
-    simulation.configuration = configuration_doc
-    simulation.save()
 
 
 def get_snapshot_by_step(id, step):
-    simulation = Simulation.objects.get(simulation_id=id)
-    return simulation.snapshots[step]
+    return Snapshot.objects.get(simulation_id=id, step=step)
+
 
 def restore_snapshot(snapshot_document):
     step = snapshot_document.step
@@ -69,7 +58,4 @@ def restore_snapshot(snapshot_document):
 
 
 def get_config(id):
-    simulation = Simulation.objects.get(simulation_id=id)
-    return simulation.configuration
-
-
+    return Configuration.objects.get(simulation_id=id)

@@ -1,17 +1,20 @@
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render
 from celery.result import AsyncResult
-import json
-import time
 
-import pymongo
 from mongoengine import connect
 
 from .forms import SimulationForm
 from .tasks import run_simulation_task
 from .simulator.simulation import initialize_simulation
 from .simulator.configuration import *
-from .simulator.models import Simulation, Snapshot, Blob
+from .simulator.models import Snapshot
+
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG)
 
 connect('simulations', host='mongo', port=27017)
 
@@ -55,9 +58,9 @@ def newsimulation(request):
             configuration = configure(form.cleaned_data)
             simulation_id = initialize_simulation(configuration)
             task = run_simulation_task.apply_async(args=[simulation_id, 0])
-
-            # return HttpResponseRedirect(f'/view_simulation/{task_id}/')
-            return HttpResponseRedirect(f'/view_simulation/{simulation_id}/')
+            task_id = task.id
+            logging.debug(task_id)
+            return HttpResponseRedirect(f'/view_simulation/{simulation_id}/{task_id}/')
 
         errors = 'The parameters are not filled or filled incorrectly! ' \
                  'Read the instructions carefully and resubmit the form'
@@ -69,31 +72,26 @@ def newsimulation(request):
 
 
 def get_snapshots(request, id, step):
-    simulation_id = id
-    simulation = Simulation.objects.get(simulation_id=simulation_id)
-    new_data = simulation.snapshots[step::]
+    new_data = Snapshot.objects(simulation_id=id, step__gte=step)
     data = {}
     for snapshot in new_data:
         data[snapshot.step] = len(snapshot.blobs)
     return JsonResponse(data, status=200)
 
 
-def view_simulation(request, id):
-    # task_id = id
-    # task_result = AsyncResult(task_id)
-
-    # result = {
-    #     "task_id": task_id,
-    #     "task_status": task_result.status,
-    #     "task_result": task_result.result
-    # }
-    simulation_id = id
-    simulation = Simulation.objects.get(simulation_id=simulation_id)
-    last_step = len(simulation.snapshots)
-    # return JsonResponse(data, status=200)
-    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': last_step})
+def resume_simulation(request, id, step):
+    task = run_simulation_task.apply_async(args=[id, step - 1])
+    return JsonResponse({'new_task_id': task.id}, status=200)
 
 
+def task_isready(request, task_id):
+    res = AsyncResult(task_id)
+    return JsonResponse({'task_is_ready': res.ready()})
+
+
+def view_simulation(request, id, task_id):
+    last_step = len(Snapshot.objects(simulation_id=id))
+    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': last_step, 'current_task_id': task_id},)
 
 
 def save_simulation(request):
