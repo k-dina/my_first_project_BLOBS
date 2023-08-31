@@ -1,3 +1,14 @@
+// simulation.js
+let isSimulationRunning = true;
+
+function stopSimulation() {
+  isSimulationRunning = false;
+}
+
+// Ваш остальной код с setInterval и запросами
+
+
+
 var ctx = document.getElementById('realtimeChart').getContext('2d');
 var step = last_step;
 var chart = new Chart(ctx, {
@@ -42,41 +53,27 @@ function shiftChartData(newData) {
 }
 }
 
-let  currentTaskId = task_id;
-console.log(task_id);
-let simulationStopped = true;
-
 setInterval(() => {
+    if (!isSimulationRunning) {
+    return; // Если симуляция остановлена, прекратить выполнение
+  }
   axios.get(`/get_snapshots/${simulation_id}/${step}/`)
   .then(function (response) {
     console.log(response);
     const newSnapshots = response.data;
     const newSnapshotLabels = Object.keys(newSnapshots)
     step = Number(step) + newSnapshotLabels.length;
+    console.log(step);
+
     if (!(step % 100)) {
-        axios.get(`/simulation_status/${currentTaskId}/`)
-        .then(function (response) {
-            console.log(response)
-            simulationStopped = response.data['task_is_ready'];
+      console.log('resuming');
+      }
 
-            if (simulationStopped) {
 
-                axios.get(`/resume_simulation/${simulation_id}/${step}/`)
-                .then(function (response) {
-                currentTaskId = response.data['new_task_id'];
-                console.log(currentTaskId);
-                });
-
-                }
-        });
-
-        }
     newSnapshotLabels.forEach(label => {
         shiftChartData({ label: label, value: newSnapshots[label] });
         })
   })
 }, 500);
-
-
 
 

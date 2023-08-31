@@ -1,10 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-from .forms import LoginForm
+from .forms import LoginForm, NewUserForm
 
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG)
 
 
 # Create your views here.
@@ -37,3 +42,23 @@ def login(request: HttpRequest):
 
 def new_user(request):
     return render(request, 'new_user.html')
+
+
+def new_user(request):
+    errors = {}
+    form = NewUserForm()
+
+    if request.method == 'POST':
+        form = NewUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            django_login(request, user)
+            return redirect('userspace')
+
+        errors = form.errors
+    return render(request, 'new_user.html', context={'form': form, 'errors': errors})
+
+
+def logout_view(request):
+    django_logout(request)
+    return redirect('simulations')

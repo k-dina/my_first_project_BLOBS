@@ -20,7 +20,7 @@ connect('simulations', host='mongo', port=27017)
 
 
 def get_user_name(user) -> str:
-    return f'{user.first_name}'
+    return f'{user.username}'
 
 
 def index(request):
@@ -57,10 +57,8 @@ def newsimulation(request):
         if form.is_valid():
             configuration = configure(form.cleaned_data)
             simulation_id = initialize_simulation(configuration)
-            task = run_simulation_task.apply_async(args=[simulation_id, 0])
-            task_id = task.id
-            logging.debug(task_id)
-            return HttpResponseRedirect(f'/view_simulation/{simulation_id}/{task_id}/')
+            run_simulation_task.apply_async(args=[simulation_id, 0])
+            return HttpResponseRedirect(f'/view_simulation/{simulation_id}/')
 
         errors = 'The parameters are not filled or filled incorrectly! ' \
                  'Read the instructions carefully and resubmit the form'
@@ -73,9 +71,11 @@ def newsimulation(request):
 
 def get_snapshots(request, id, step):
     new_data = Snapshot.objects(simulation_id=id, step__gte=step)
+
     data = {}
     for snapshot in new_data:
         data[snapshot.step] = len(snapshot.blobs)
+    logging.debug(data)
     return JsonResponse(data, status=200)
 
 
@@ -84,14 +84,10 @@ def resume_simulation(request, id, step):
     return JsonResponse({'new_task_id': task.id}, status=200)
 
 
-def task_isready(request, task_id):
-    res = AsyncResult(task_id)
-    return JsonResponse({'task_is_ready': res.ready()})
-
-
-def view_simulation(request, id, task_id):
+def view_simulation(request, id):
     last_step = len(Snapshot.objects(simulation_id=id))
-    return render(request, 'view_simulation.html', {'simulation_id': id, 'last_step': last_step, 'current_task_id': task_id},)
+    return render(request, 'view_simulation.html',
+                  {'simulation_id': id, 'last_step': last_step})
 
 
 def save_simulation(request):

@@ -1,3 +1,5 @@
+import logging
+
 import pymongo
 from mongoengine import connect
 from .models import Blob, Snapshot, Configuration
@@ -6,8 +8,15 @@ client = pymongo.MongoClient()
 
 db = client['simulations']
 
+
 connect('simulations', host='mongo', port=27017)
 
+#Snapshot.create_index([('simulation_id', 1), ('step', 1)], unique=True)
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG)
 
 def save_snapshot(id, step, blobs, field, blobs_on_field):
     blob_documents = {}
@@ -19,6 +28,7 @@ def save_snapshot(id, step, blobs, field, blobs_on_field):
     blobs_on_field = {str(key): value for key, value in blobs_on_field.items()}
 
     snapshot = Snapshot(simulation_id=id, step=step, blobs=blob_documents, field=field, blobs_on_field=blobs_on_field)
+    logging.debug(snapshot)
     snapshot.save()
 
 
