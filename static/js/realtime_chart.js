@@ -65,8 +65,9 @@ setInterval(() => {
     step = Number(step) + newSnapshotLabels.length;
     console.log(step);
 
-    if (!(step % 100)) {
+    if (step % 100 == 1) {
       console.log('resuming');
+      axios.get(`/resume_simulation/${simulation_id}/${step}/`)
       }
 
 

@@ -2,21 +2,22 @@ import logging
 
 import pymongo
 from mongoengine import connect
-from .models import Blob, Snapshot, Configuration
+from .models import Blob, Snapshot, Configuration, UserProfile, NameSimulation
 
 client = pymongo.MongoClient()
 
 db = client['simulations']
 
-
 connect('simulations', host='mongo', port=27017)
 
-#Snapshot.create_index([('simulation_id', 1), ('step', 1)], unique=True)
+Snapshot.create_index([('simulation_id', 1), ('step', 1)], unique=True)
+
 import logging
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.DEBUG)
+
 
 def save_snapshot(id, step, blobs, field, blobs_on_field):
     blob_documents = {}
@@ -69,3 +70,61 @@ def restore_snapshot(snapshot_document):
 
 def get_config(id):
     return Configuration.objects.get(simulation_id=id)
+
+
+def drop_simulation(simulation_id):
+    Snapshot.objects(simulation_id=simulation_id).delete()
+    Configuration.objects.filter(simulation_id=simulation_id).delete()
+
+
+
+
+def get_or_create_user_profile(user_id):
+    user_profile = UserProfile.objects(user=user_id).first()
+    if not user_profile:
+        user_profile = UserProfile(user=user_id)
+        user_profile.save()
+    return user_profile
+
+
+def save_simulation(user_id, simulation_id):
+    user_profile = get_or_create_user_profile(user_id)
+    user_profile.simulations.append(simulation_id)
+    user_profile.save()
+
+
+def name_simulation(simulation_id, name):
+    name_simulation = NameSimulation(simulation_id=simulation_id, name=name)
+    name_simulation.save()
+
+
+def get_simulation_name(simulation_id):
+    return NameSimulation.objects.get(simulation_id=simulation_id).name
+
+
+def list_simulations(user_id):
+    simulations = UserProfile.objects.get(user=user_id).simulations
+    simulation_names = {}
+
+    for simulation in simulations:
+        name = get_simulation_name(simulation)
+        simulation_names[simulation] = name
+
+    return simulation_names
+
+
+def rename_simulation(simulation_id, new_name):
+    name_simulation_document = NameSimulation.objects.get(simulation_id=simulation_id)
+    name_simulation_document.name = new_name
+    name_simulation_document.save()
+
+
+def delete_details(simulation_id, user_id):
+    user_profile = UserProfile.objects.get(user=user_id)
+    user_profile.simulations.remove(simulation_id)
+    user_profile.save()
+
+    name_simulation_document = NameSimulation.objects.get(simulation_id=simulation_id)
+    name_simulation_document.delete()
+
+

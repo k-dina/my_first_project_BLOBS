@@ -14,22 +14,13 @@
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12">
                 <div class="card shadow-2-strong" style="border-radius: 1rem;">
-                    <div class="card-body p-5 text-center">
+                    <div class="card-body p-5">
 
-                        <h3 class="mb-5 text-center">Enter title to save your simulation:</h3>
-                        <form method="post" novalidate>
-                            {% csrf_token %}
-                            <div class="mb-5">
-                                <input type="text" class="form-control form-control-lg mb-10" maxlength="100"/>
-                            </div>
-                            <!-- пока поставим просто ссылку для хождения -->
-                            <a href="{% url 'userspace' %}" class="btn btn-primary btn-lg btn-block "
-                               type="submit">Save to my simulations</a>
+                        <h3 class="mb-5 text-center">This is your simulation!</h3>
+                        <canvas id="realtimeChart"></canvas>
 
-
-
-                        </form>
-
+                        {% block extra_content_current_simulation %}{% endblock %}
+                        {% block extra_content_saved_simulation %}{% endblock %}
 
                     </div>
                 </div>
@@ -38,8 +29,23 @@
     </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script type="text/javascript">
+   var simulation_id = "{{simulation_id}}";
+   var last_step = "{{last_step}}";
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/realtime_chart.js' %}"></script>
+
+{% block extra_scripts_current_simulation %}{% endblock %}
+
+<script src="{% static 'js/save_button.js' %}"></script>
+
 </body>
 </html>

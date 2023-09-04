@@ -30,3 +30,11 @@ class Configuration(Document):
     life_increase = IntField()
     prob_decrease = FloatField()
 
+
+class UserProfile(Document):
+    user = IntField()
+    simulations = ListField()
+
+class NameSimulation(Document):
+    simulation_id = StringField()
+    name = StringField()

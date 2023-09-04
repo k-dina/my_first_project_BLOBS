@@ -22,3 +22,8 @@ class NewUserForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+# class NameSimulationForm(forms.Form):
+#     simulation_id = forms.CharField()
+#     name = forms.CharField()
